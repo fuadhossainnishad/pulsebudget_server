@@ -7,7 +7,7 @@ const filePath: string = path.join(__dirname, '../../public/files/dataset_compan
 )
 const databaseConnection = async (): Promise<void> => {
     try {
-        await mongoose.connect(envConfig.databaseUrl)
+        await mongoose.connect(envConfig.databaseUrl!)
         console.log("Connected to database")
         await extractCSV(filePath)
     } catch (error) {
