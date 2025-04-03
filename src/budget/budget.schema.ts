@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 import { formateDecimal } from "../lib/pareseData";
 
 export interface BudgetInterface extends Document {
@@ -35,6 +35,6 @@ const BudgetSchema = new Schema<BudgetInterface>(
     }
 );
 
-const BudgetModel = mongoose.model<BudgetInterface>("Budget", BudgetSchema);
+const BudgetModel: Model<BudgetInterface> = mongoose.model<BudgetInterface>("Budget", BudgetSchema);
 
 export default BudgetModel;

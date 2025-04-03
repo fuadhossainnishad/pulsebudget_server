@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface FileInterface extends Document {
     fileName: string;
@@ -14,5 +14,5 @@ export const fileSchema = new Schema<FileInterface>({
     { timestamps: true }
 );
 
-const FileModel = mongoose.model<FileInterface>('File', fileSchema)
+const FileModel: Model<FileInterface> = mongoose.model<FileInterface>('File', fileSchema)
 export default FileModel

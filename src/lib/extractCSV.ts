@@ -14,11 +14,12 @@ export const extractCSV = async (path: string) => {
     const fileExist = await isFileExist(path)
     if (fileExist) {
         console.log('file exist')
-        return};
+        return
+    };
     const transactions: BudgetInterface[] = []
     fs.createReadStream(path)
         .pipe(csvParser())
-        .on('data', (row) => {
+        .on('data', (row: BudgetInterface) => {
             const transaction = new BudgetModel({
                 Transaction_ID: row.Transaction_ID,
                 Date: new Date(row.Date),
