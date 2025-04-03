@@ -1,21 +1,16 @@
 import fs from 'fs';
 import csvParser from 'csv-parser';
 import BudgetModel, { BudgetInterface } from '../budget/budget.schema';
-import FileModel from './file.schema';
 import mongoose from 'mongoose';
-
-
-export const isFileExist = async (path: string): Promise<boolean> => {
-    const isExist = await FileModel.findOne({ fileName: path })
-    return !!isExist
-}
+import { insertFileInfoService, isFileExistService } from './file.service';
 
 export const extractCSV = async (path: string) => {
-    const fileExist = await isFileExist(path)
+    const fileExist = await isFileExistService(path)
     if (fileExist) {
         console.log('file exist')
         return
     };
+    console.log("now extracting CSV")
     const transactions: BudgetInterface[] = []
     fs.createReadStream(path)
         .pipe(csvParser())
@@ -41,6 +36,13 @@ export const extractCSV = async (path: string) => {
                 console.log('CSV data successfully importing start')
                 await BudgetModel.insertMany(transactions)
                 console.log('CSV data successfully imported')
+                const fileInsert = await insertFileInfoService(path)
+                if (fileInsert) {
+                    console.log("File info inserted successfully")
+                } else if (!fileInsert) {
+                    console.log("Error inserting file info")
+                }
+                console.log("done extracting CSV")
                 mongoose.connection.close()
             } catch (error) {
                 console.error("Error inserting data:", error);
