@@ -8,5 +8,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 exports.envConfig = {
     databaseUrl: process.env.MONGODB_URL,
-    port: process.env.PORT
+    port: process.env.PORT,
+    url: process.env.URL,
 };
