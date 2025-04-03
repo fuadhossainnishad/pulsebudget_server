@@ -1,6 +1,5 @@
-import csv from 'csv-parser';
 import fs from 'fs';
-import { envConfig } from '../config/env.config';
+import csvParser from 'csv-parser';
 import BudgetModel, { BudgetInterface } from '../budget/budget.schema';
 import FileModel from './file.schema';
 import mongoose from 'mongoose';
@@ -18,7 +17,7 @@ export const extractCSV = async (path: string) => {
         return};
     const transactions: BudgetInterface[] = []
     fs.createReadStream(path)
-        .pipe(csv())
+        .pipe(csvParser())
         .on('data', (row) => {
             const transaction = new BudgetModel({
                 Transaction_ID: row.Transaction_ID,
