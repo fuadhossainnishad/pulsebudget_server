@@ -33,22 +33,11 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.fileSchema = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const pareseData_1 = require("../lib/pareseData");
-const BudgetSchema = new mongoose_1.Schema({
-    Transaction_ID: { type: String, required: true, unique: true },
-    Date: { type: Date, required: true },
-    Subsidiary: { type: String, required: true },
-    Sector: { type: String, required: true },
-    User_ID: { type: String, required: true },
-    Allocated_Budget: { type: Number, required: true, set: pareseData_1.formateDecimal },
-    Spent_Amount: { type: Number, required: true, set: pareseData_1.formateDecimal },
-    Remaining_Budget: { type: Number, required: true, set: pareseData_1.formateDecimal },
-    Revenue_Generated: { type: Number, required: true, set: pareseData_1.formateDecimal },
-    Transaction_Type: { type: String, required: true },
-}, {
-    timestamps: true,
-    toJSON: { getters: true },
-});
-const BudgetModel = mongoose_1.default.model("Budget", BudgetSchema);
-exports.default = BudgetModel;
+exports.fileSchema = new mongoose_1.Schema({
+    fileName: { type: String, required: true },
+    extractedAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+const FileModel = mongoose_1.default.model('File', exports.fileSchema);
+exports.default = FileModel;

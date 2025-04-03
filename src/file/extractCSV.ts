@@ -1,7 +1,6 @@
 import fs from 'fs';
 import csvParser from 'csv-parser';
 import BudgetModel, { BudgetInterface } from '../budget/budget.schema';
-import mongoose from 'mongoose';
 import { insertFileInfoService, isFileExistService } from './file.service';
 
 export const extractCSV = async (path: string) => {
@@ -14,7 +13,7 @@ export const extractCSV = async (path: string) => {
     const transactions: BudgetInterface[] = []
     fs.createReadStream(path)
         .pipe(csvParser())
-        .on('data', (row: BudgetInterface) => {
+        .on('data', (row: any) => {
             const transaction = new BudgetModel({
                 Transaction_ID: row.Transaction_ID,
                 Date: new Date(row.Date),
@@ -43,7 +42,6 @@ export const extractCSV = async (path: string) => {
                     console.log("Error inserting file info")
                 }
                 console.log("done extracting CSV")
-                mongoose.connection.close()
             } catch (error) {
                 console.error("Error inserting data:", error);
 

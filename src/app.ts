@@ -3,7 +3,14 @@ import cors from "cors";
 import userRoutes from "./users/user.routes";
 
 const app = express();
-app.use(cors())
+app.use(express.json())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: '*',
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 
 app.use('/', userRoutes)
 

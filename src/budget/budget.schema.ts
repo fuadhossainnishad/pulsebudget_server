@@ -18,7 +18,7 @@ export interface BudgetInterface extends Document {
 
 const BudgetSchema = new Schema<BudgetInterface>(
     {
-        Transaction_ID: { type: String, required: true },
+        Transaction_ID: { type: String, required: true,unique:true },
         Date: { type: Date, required: true },
         Subsidiary: { type: String, required: true },
         Sector: { type: String, required: true },
