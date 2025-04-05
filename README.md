@@ -1,9 +1,6 @@
-Below is the updated README file with the live deployment links for the backend (`https://pulsebudget-server.onrender.com/`) and frontend (`https://pulsebudget-viewer.vercel.app/`), integrated into the appropriate sections. I've also ensured the document remains cohesive and complete.
+Below is the README file with the live deployment links for the backend (`https://pulsebudget-server.onrender.com/`) and frontend (`https://pulsebudget-viewer.vercel.app/`), integrated into the appropriate sections. I've also ensured the document remains cohesive and complete.
 
 ---
-
-### Updated README File
-
 ```markdown
 # Budget Allocation Dashboard
 
@@ -297,4 +294,3 @@ export default userRoutes;
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
