@@ -1,6 +1,13 @@
+Below is the updated README file with the live deployment links for the backend (`https://pulsebudget-server.onrender.com/`) and frontend (`https://pulsebudget-viewer.vercel.app/`), integrated into the appropriate sections. I've also ensured the document remains cohesive and complete.
+
+---
+
+### Updated README File
+
+```markdown
 # Budget Allocation Dashboard
 
-This project is a full-stack application built with **Next.js** (frontend) and **Node.js with MongoDB** (backend) to manage and visualize company budget allocation data. It extracts data from a CSV file, stores it in MongoDB, and displays it in a user-friendly dashboard with bar charts.
+This project is a full-stack application built with **Next.js** (frontend) and **Node.js with MongoDB** (backend) to manage and visualize company budget allocation data. It extracts data from a CSV file, stores it in MongoDB, and displays it in a user-friendly dashboard with bar charts. User authentication is implemented to restrict access based on roles.
 
 ## Table of Contents
 - [Features](#features)
@@ -9,9 +16,11 @@ This project is a full-stack application built with **Next.js** (frontend) and *
 - [Backend Schema](#backend-schema)
 - [Data Structure](#data-structure)
 - [User Roles and Access Levels](#user-roles-and-access-levels)
+- [Authentication](#authentication)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 - [Frontend](#frontend)
+- [Live Deployment](#live-deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -19,7 +28,9 @@ This project is a full-stack application built with **Next.js** (frontend) and *
 - Import budget allocation data from a CSV file into MongoDB.
 - Store metadata about processed files.
 - Visualize budget data with interactive bar charts.
-- RESTful API for data retrieval.
+- Filter budget data by subsidiary and sector.
+- RESTful API for data retrieval and user management.
+- User authentication with role-based access (Admin and Viewer).
 - Scalable backend with Mongoose schemas.
 
 ## Tech Stack
@@ -27,6 +38,7 @@ This project is a full-stack application built with **Next.js** (frontend) and *
 - **Backend**: Node.js, Express, MongoDB, Mongoose
 - **Languages**: TypeScript
 - **Tools**: Yarn, Git
+- **Authentication**: JSON Web Tokens (JWT)
 
 ## Installation
 
@@ -53,6 +65,7 @@ This project is a full-stack application built with **Next.js** (frontend) and *
    ```
    DATABASE_URL=mongodb://localhost:27017/budget_db # or your MongoDB Atlas URL
    PORT=3000
+   JWT_SECRET=your-secret-key # Replace with a secure key for JWT
    ```
 
 4. **Prepare CSV File**:
@@ -96,6 +109,18 @@ This project is a full-stack application built with **Next.js** (frontend) and *
   - `Transaction_ID` (unique)
   - `Date` (ascending)
 
+### User Schema (`user.schema.ts`)
+- **Purpose**: Manages user authentication and roles.
+- **Fields**:
+  - `userName`: `String` (required) - User's name.
+  - `email`: `String` (required, unique) - User's email address.
+  - `password`: `String` (required) - Hashed password (using `hashPassword`).
+  - `role`: `Enum` (default: `admin`) - User role (`viewer` or `admin`).
+  - `createdAt`: `Date` (auto-generated) - Creation timestamp.
+  - `updatedAt`: `Date` (auto-generated) - Last update timestamp.
+- **Collection**: `users`
+- **Indexes**: `email` (unique)
+
 ## Data Structure
 
 ### CSV File Format
@@ -137,9 +162,20 @@ Transaction_ID,Date,Subsidiary,Sector,User_ID,Allocated_Budget,Spent_Amount,Rema
     "updatedAt": "2025-04-03T12:00:00Z"
   }
   ```
+- **User Collection**:
+  ```json
+  {
+    "_id": "507f191e810c19729de860eb",
+    "userName": "adminUser",
+    "email": "admin@example.com",
+    "password": "$2b$10$hashedpassword",
+    "role": "admin",
+    "createdAt": "2025-04-03T12:00:00Z",
+    "updatedAt": "2025-04-03T12:00:00Z"
+  }
+  ```
 
 ## User Roles and Access Levels
-*(Assumed based on typical use cases; adjust as needed)*
 
 ### Roles
 1. **Admin**:
@@ -148,72 +184,109 @@ Transaction_ID,Date,Subsidiary,Sector,User_ID,Allocated_Budget,Spent_Amount,Rema
      - Import CSV files into the database.
      - View, edit, and delete budget records.
      - Manage file metadata in the `files` collection.
-     - Access all charts and analytics.
-
-2. **Viewer**:
+     - Access all charts, filters, and transaction details.
+2. **Viewer** (default for non-logged-in users):
    - **Access**: Read-only access to budget data.
    - **Permissions**:
-     - View budget charts and summaries.
-     - No ability to import, edit, or delete data.
+     - View dashboard charts and summaries.
+     - Apply filters to budget data.
+     - No access to transaction details or data modification.
 
 ### Access Levels
-- **API Authentication**: Currently, no authentication is implemented. To enforce roles:
-  - Add JWT or OAuth middleware to API routes (e.g., `/api/budget`).
-  - Restrict `POST`/`PUT`/`DELETE` requests to Admins.
-- **Frontend**: Role-based rendering can be added (e.g., hide import buttons for Viewers).
+- **API Authentication**: Uses JWT middleware:
+  - Protected routes (e.g., `/dashboard`, `/filter`) require a valid token for full Admin access.
+  - Unauthenticated requests default to Viewer mode with limited data.
+- **Frontend**: Role-based rendering:
+  - Logged-in users (Admins) see transaction details.
+  - Non-logged-in users (Viewers) see only the homepage and filter options.
+
+## Authentication
+- **Process**:
+  1. **User Creation**: Admins can create accounts via `/api/users/create` with `userName`, `email`, and `password`. Passwords are hashed using `bcrypt`.
+  2. **Login**: Users log in via `/api/users/login` with `email` and `password`. A JWT token is returned if credentials are valid.
+  3. **Role Check**:
+     - If logged in (token present), the user is treated as an Admin and can access all features.
+     - If not logged in (no token), the user is a Viewer with restricted access.
+  4. **Token Verification**: Protected API routes use middleware to verify the JWT token.
+- **Dependencies**:
+  ```bash
+  yarn add bcrypt jsonwebtoken
+  yarn add -D @types/bcrypt @types/jsonwebtoken
+  ```
 
 ## Usage
 1. **Import Data**:
    - Place the CSV file in `/files`.
-   - Start the app with `yarn dev`. The backend will automatically process the CSV and store data in MongoDB if a matching `fileName` entry exists in the `files` collection.
+   - Start the app with `yarn dev`. The backend processes the CSV if a matching `fileName` entry exists in the `files` collection.
 
-2. **View Dashboard**:
-   - Open `http://localhost:3000` in your browser to see the bar chart visualization of budget data.
+2. **User Management**:
+   - Create an Admin user: `POST /api/users/create` with `{ "userName": "admin", "email": "admin@example.com", "password": "password123" }`.
+   - Log in: `POST /api/users/login` with `{ "email": "admin@example.com", "password": "password123" }`.
 
-3. **Add File Metadata (if needed)**:
-   - Manually insert a document into the `files` collection to allow CSV processing:
+3. **View Dashboard**:
+   - Open `http://localhost:3000` (local) or [https://pulsebudget-viewer.vercel.app/](https://pulsebudget-viewer.vercel.app/) (live):
+     - Without login: See charts and filters (Viewer mode).
+     - With login: See charts, filters, and transaction details (Admin mode).
+
+4. **Add File Metadata (if needed)**:
+   - Run:
      ```bash
      yarn ts-node -e 'require("./scripts/insertFile").insertFile()'
      ```
-     Example script (`scripts/insertFile.ts`):
-     ```typescript
-     import mongoose from 'mongoose';
-     import FileModel from '../models/file.schema';
-     import { envConfig } from '../config/env.config';
-
-     export const insertFile = async () => {
-       await mongoose.connect(envConfig.databaseUrl);
-       await FileModel.create({
-         fileName: '/files/dataset_company_budget_allocation_dashboard.csv',
-         extractedAt: new Date(),
-       });
-       console.log('File metadata inserted');
-       await mongoose.connection.close();
-     };
-
-     insertFile();
-     ```
 
 ## API Endpoints
-- **GET `/api/budget`**:
-  - **Description**: Fetch all budget records.
-  - **Response**: Array of budget objects (see [Data Structure](#data-structure)).
-  - **Status Codes**:
-    - `200`: Success
-    - `500`: Server error
+
+### Budget Routes (`budget.route.ts`)
+```typescript
+import express from 'express';
+import { budgetDataController, fieldsFindController, filteredBudgetDataController } from './budget.controller';
+import { authMiddleware } from './auth.middleware';
+const budgetRoute = express.Router();
+
+budgetRoute.get('/dashboard', authMiddleware, budgetDataController);
+budgetRoute.get('/filter', authMiddleware, filteredBudgetDataController);
+budgetRoute.get('/fields', authMiddleware, fieldsFindController);
+
+export default budgetRoute;
+```
+- **GET `/api/budget/dashboard`**:
+  - Total budget and subsidiary-wise summary.
+- **GET `/api/budget/filter`**:
+  - Filtered data by `subsidiary` and/or `sector`.
+- **GET `/api/budget/fields`**:
+  - Returns unique values for filtering (e.g., all subsidiaries).
+
+### User Routes (`user.route.ts`)
+```typescript
+import express from 'express';
+import { userCreateController, userFindingController } from './user.controller';
+const userRoutes = express.Router();
+
+userRoutes.post('/create', userCreateController);
+userRoutes.post('/login', userFindingController);
+
+export default userRoutes;
+```
+- **POST `/api/users/create`**:
+  - Creates a new user (Admin only in production).
+- **POST `/api/users/login`**:
+  - Authenticates and returns a JWT token.
 
 ## Frontend
-- **Dashboard**: Located at `/` (root route).
-- **Chart**: Displays a bar chart comparing `Allocated_Budget` and `Spent_Amount` by `Transaction_ID`.
+- **Dashboard**: `/` (root route):
+  - Viewer: Bar chart with `Allocated_Budget` vs `Spent_Amount`, filter options.
+  - Admin: Adds transaction details table (e.g., `Transaction_ID`, `Date`, etc.).
 - **Dependencies**:
-  - `react-chartjs-2` and `chart.js` for chart rendering.
-- **Customization**:
-  - Edit `components/BarChart.tsx` to change chart type (e.g., Line, Pie) or data fields.
+  ```bash
+  yarn add chart.js react-chartjs-2 axios
+  ```
+- **Live URL**: [https://pulsebudget-viewer.vercel.app/](https://pulsebudget-viewer.vercel.app/)
 
-### Install Frontend Dependencies
-```bash
-yarn add chart.js react-chartjs-2
-```
+## Live Deployment
+- **Backend**: Hosted on Render at [https://pulsebudget-server.onrender.com/](https://pulsebudget-server.onrender.com/)
+  - Access API endpoints like `/api/budget/dashboard` and `/api/users/login`.
+- **Frontend**: Hosted on Vercel at [https://pulsebudget-viewer.vercel.app/](https://pulsebudget-viewer.vercel.app/)
+  - Displays the dashboard and interacts with the backend API.
 
 ## Contributing
 1. Fork the repository.
@@ -224,12 +297,4 @@ yarn add chart.js react-chartjs-2
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-### Changes Made
-- **Table of Contents**: Now uses proper Markdown syntax with `-` for list items and links directly to section headers using `#` anchors.
-- **Yarn Commands**: All package management and run commands are updated for Yarn (e.g., `yarn install`, `yarn dev`).
-- **Completeness**: Ensured all sections are fully populated and relevant to your project.
-
-This README should now work as intended with a clickable Table of Contents in Markdown viewers (e.g., GitHub). Let me know if you need further refinements!
+```
