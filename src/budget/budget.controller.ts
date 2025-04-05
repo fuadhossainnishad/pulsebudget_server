@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { budgetDataService, filteredBudgetDataService } from "./budget.service";
+import { budgetDataService, fieldsFindService, filteredBudgetDataService } from "./budget.service";
 
 export const filteredBudgetDataController = async (req: Request, res: Response) => {
      try {
@@ -26,6 +26,20 @@ export const budgetDataController = async (req: Request, res: Response) => {
                res.status(404).json({ message: 'Budget data not found' });
           }
           res.status(200).json({ message: "Budget Data", data: budgetData });
+     } catch (error) {
+          res.status(500).json({ error: "Internal Server Error" });
+     }
+}
+
+
+export const fieldsFindController = async (req: Request, res: Response) => {
+     try {
+          const fields = await fieldsFindService()
+          if (!fields) {
+               res.status(404).json({ message: 'Fields not found' });
+          }
+          console.log(fields)
+          res.status(200).json({ message: "Fields lists", fields: fields });
      } catch (error) {
           res.status(500).json({ error: "Internal Server Error" });
      }

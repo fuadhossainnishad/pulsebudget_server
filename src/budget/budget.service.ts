@@ -1,5 +1,5 @@
 import { match } from "assert"
-import BudgetModel from "./budget.schema"
+import BudgetModel from './budget.schema';
 
 export const filteredBudgetDataService = async (matchFields: { Subsidiary?: string; Sector?: string }
 ) => {
@@ -91,4 +91,11 @@ export const budgetDataService = async () => {
         return !!budgetData || !!subsidiary
     }
     return { "budget": budgetData, "subsidiary": subsidiary }
+}
+
+export const fieldsFindService = async () => {
+    const subsidiary = await BudgetModel.distinct("Subsidiary")
+    const sector = await BudgetModel.distinct("Sector")
+
+    return { subsidiary, sector }
 }

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.budgetDataService = exports.filteredBudgetDataService = void 0;
+exports.fieldsFindService = exports.budgetDataService = exports.filteredBudgetDataService = void 0;
 const budget_schema_1 = __importDefault(require("./budget.schema"));
 const filteredBudgetDataService = async (matchFields) => {
     const budgetData = await budget_schema_1.default.aggregate([
@@ -85,3 +85,9 @@ const budgetDataService = async () => {
     return { "budget": budgetData, "subsidiary": subsidiary };
 };
 exports.budgetDataService = budgetDataService;
+const fieldsFindService = async () => {
+    const subsidiary = await budget_schema_1.default.distinct("Subsidiary");
+    const sector = await budget_schema_1.default.distinct("Sector");
+    return { subsidiary, sector };
+};
+exports.fieldsFindService = fieldsFindService;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.budgetDataController = exports.filteredBudgetDataController = void 0;
+exports.fieldsFindController = exports.budgetDataController = exports.filteredBudgetDataController = void 0;
 const budget_service_1 = require("./budget.service");
 const filteredBudgetDataController = async (req, res) => {
     try {
@@ -36,3 +36,17 @@ const budgetDataController = async (req, res) => {
     }
 };
 exports.budgetDataController = budgetDataController;
+const fieldsFindController = async (req, res) => {
+    try {
+        const fields = await (0, budget_service_1.fieldsFindService)();
+        if (!fields) {
+            res.status(404).json({ message: 'Fields not found' });
+        }
+        console.log(fields);
+        res.status(200).json({ message: "Fields lists", fields: fields });
+    }
+    catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+exports.fieldsFindController = fieldsFindController;
