@@ -10,18 +10,51 @@ const filteredBudgetDataService = async (matchFields) => {
         { $match: matchFields },
         {
             $group: {
-                _id: { subsidiary: "$subsidiary", sector: "$sector" },
+                _id: { subsidiary: "$Subsidiary", sector: "$Sector" },
                 totalAllocatedBudget: { $sum: "$Allocated_Budget" },
                 totalSpentAmount: { $sum: "$Spent_Amount" },
                 totalRemainBudget: { $sum: "$Remaining_Budget" }
             }
         },
-        { $sort: { totalAllocatedBudget: -1 } }
+        // { $sort: { totalAllocatedBudget: -1 } }
     ]);
-    if (!budgetData) {
-        return !!budgetData;
+    const subsidiaryData = matchFields.hasOwnProperty("Subsidiary") ? await budget_schema_1.default.aggregate([
+        { $match: { Subsidiary: matchFields.Subsidiary } },
+        {
+            $group: {
+                _id: "$Subsidiary",
+                totalAllocatedBudget: { $sum: "$Allocated_Budget" },
+                totalSpentAmount: { $sum: "$Spent_Amount" },
+                totalRemainBudget: { $sum: "$Remaining_Budget" }
+            }
+        },
+    ]) : [];
+    const sectorData = matchFields.hasOwnProperty('Sector') ? await budget_schema_1.default.aggregate([
+        { $match: { Sector: matchFields.Sector } },
+        {
+            $group: {
+                _id: "$Sector",
+                totalAllocatedBudget: { $sum: "$Allocated_Budget" },
+                totalSpentAmount: { $sum: "$Spent_Amount" },
+                totalRemainBudget: { $sum: "$Remaining_Budget" }
+            }
+        },
+        // { $sort: { totalAllocatedBudget: -1 } }
+    ]) : [];
+    const result = {
+        filtered: budgetData || [],
+        subsidiary: subsidiaryData || [],
+        sector: sectorData || []
+    };
+    // Return null if all aggregations are empty or undefined
+    if ((!budgetData || budgetData.length === 0) &&
+        (!subsidiaryData || subsidiaryData.length === 0) &&
+        (!sectorData || sectorData.length === 0)) {
+        console.log('No data found for matchFields:', matchFields);
+        return null;
     }
-    return budgetData;
+    console.log('Filtered data result:', result);
+    return result;
 };
 exports.filteredBudgetDataService = filteredBudgetDataService;
 const budgetDataService = async () => {
@@ -35,9 +68,20 @@ const budgetDataService = async () => {
             }
         },
     ]);
-    if (!budgetData) {
-        return !!budgetData;
+    const subsidiary = await budget_schema_1.default.aggregate([
+        {
+            $group: {
+                _id: "$Subsidiary",
+                totalAllocatedBudget: { $sum: "$Allocated_Budget" },
+                totalSpentAmount: { $sum: "$Spent_Amount" },
+                totalRemainBudget: { $sum: "$Remaining_Budget" }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+    if (!budgetData || !subsidiary) {
+        return !!budgetData || !!subsidiary;
     }
-    return budgetData;
+    return { "budget": budgetData, "subsidiary": subsidiary };
 };
 exports.budgetDataService = budgetDataService;

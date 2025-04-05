@@ -1,7 +1,9 @@
 import express from 'express';
-import { userFindingController } from './user.controller';
-const userRoutes=express.Router()
+import { userCreateController, userFindingController } from './user.controller';
+const userRoutes = express.Router()
 
-userRoutes.post('/login',userFindingController)
+userRoutes.post('/create', userCreateController)
+userRoutes.post('/login', userFindingController)
+
 
 export default userRoutes;

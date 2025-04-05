@@ -18,8 +18,8 @@ export interface UserInterface extends Document {
 export const userSchema = new Schema<UserInterface>({
     userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, set: hashPassword },
-    role: { type: String, enum: Object.values(UserRole), default: UserRole.VIEWER }
+    password: { type: String, required: true},
+    role: { type: String, enum: Object.values(UserRole), default: UserRole.ADMIN }
 },
     { timestamps: true }
 )

@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userSchema = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const hashPassword_1 = require("../lib/hashPassword");
 var UserRole;
 (function (UserRole) {
     UserRole["VIEWER"] = "viewer";
@@ -44,8 +43,8 @@ var UserRole;
 exports.userSchema = new mongoose_1.Schema({
     userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, set: hashPassword_1.hashPassword },
-    role: { type: String, enum: Object.values(UserRole), default: UserRole.VIEWER }
+    password: { type: String, required: true },
+    role: { type: String, enum: Object.values(UserRole), default: UserRole.ADMIN }
 }, { timestamps: true });
 const UserModel = mongoose_1.default.model('User', exports.userSchema);
 exports.default = UserModel;
